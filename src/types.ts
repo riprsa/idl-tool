@@ -17,11 +17,14 @@ export interface Program {
     events?: Event[];
     name?: string;
     version?: string;
+    publicKey?: string;
+    prefix?: string;
 }
 
 export interface Account {
     name: string;
     docs?: string[];
+    discriminator?: number[];
     data?: {
         fields: Field[];
     };
@@ -36,6 +39,7 @@ export interface Instruction {
     accounts?: InstructionAccount[];
     args?: Argument[];
     arguments?: Argument[];
+    discriminator?: number[];
 }
 
 export interface InstructionAccount {
@@ -94,6 +98,7 @@ export interface ErrorType {
 export interface Event {
     name: string;
     docs?: string[];
+    discriminator?: number[];
     type?: {
         fields: Field[];
     };

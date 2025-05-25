@@ -1,10 +1,11 @@
-import type { IDL, Account, Instruction, Type, ErrorType, Event, TypeNode } from './types';
+import type { IDL, Account, Instruction, Type, ErrorType, Event, TypeNode, Program } from './types';
 import { isTypeNodeObject } from './types';
 import './styles.css';
 
 class IDLViewer {
     private idlContent: HTMLElement;
     private fileInput: HTMLInputElement;
+    private currentProgram: Program | null = null;
 
     constructor() {
         this.idlContent = document.getElementById('idlContent')!;
@@ -38,11 +39,89 @@ class IDLViewer {
         });
     }
 
+    private isStandardProgram(program: Program): boolean {
+        // TODO: expand the list
+        const standardPrograms = [
+            '11111111111111111111111111111111', // System Program
+            'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA', // Token Program
+            'ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL', // Associated Token Program
+            'metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s', // Metadata Program
+        ];
+        return standardPrograms.includes(program.publicKey || '');
+    }
+
+    private generateTypeScriptCode(entity: Account | Instruction | Event, type: 'account' | 'instruction' | 'event'): string {
+        if (!this.currentProgram) return '';
+
+        if (this.isStandardProgram(this.currentProgram)) {
+            alert('Code generation is not applicable for standard Solana programs');
+            return '';
+        }
+
+        switch (type) {
+            case 'account':
+                return this.generateTypeScriptAccountCode(entity as Account);
+            case 'instruction':
+                return this.generateTypeScriptInstructionCode(entity as Instruction);
+            case 'event':
+                return this.generateTypeScriptEventCode(entity as Event);
+            default:
+                return '';
+        }
+    }
+
+    private generateTypeScriptAccountCode(account: Account): string {
+        return `// Fetch account data
+const account = await program.account.${account.name}.fetch(accountAddress);
+console.log('Account data:', account);`;
+    }
+
+    private generateTypeScriptInstructionCode(instruction: Instruction): string {
+        const args = instruction.args || instruction.arguments || [];
+        const accounts = instruction.accounts || [];
+
+        return `// Call instruction
+const tx = await program.methods
+    .${instruction.name}(${args.map(arg => arg.name).join(', ')})
+    .accounts({
+        ${accounts.map(acc => `${acc.name}: ${acc.name}Pubkey`).join(',\n        ')}
+    })
+    .instruction();
+
+console.log('Instruction:', tx);`;
+    }
+
+    private generateTypeScriptEventCode(event: Event): string {
+        return `// Subscribe to event
+program.addEventListener("${event.name}", (event) => {
+    console.log('Event received:', event);
+});`;
+    }
+
+    private addCopyButton(container: HTMLElement, entity: Account | Instruction | Event, type: 'account' | 'instruction' | 'event'): void {
+        const button = document.createElement('button');
+        button.className = 'copy-button';
+        button.innerHTML = '📋 Copy Code';
+        button.addEventListener('click', () => {
+            const code = this.generateTypeScriptCode(entity, type);
+            if (code) {
+                navigator.clipboard.writeText(code).then(() => {
+                    button.innerHTML = '✓ Copied!';
+                    setTimeout(() => {
+                        button.innerHTML = '📋 Copy Code';
+                    }, 2000);
+                });
+            }
+        });
+        container.appendChild(button);
+    }
+
     private displayIDL(idl: IDL): void {
         this.clearAllSections();
 
         // Handle different IDL formats
         const programData = idl.program || idl;
+        this.currentProgram = programData;
 
         if (programData.accounts) {
             this.displayAccounts(programData.accounts);
@@ -79,6 +158,10 @@ class IDLViewer {
                 html += `<div class="docs">${account.docs.join('<br>')}</div>`;
             }
 
+            if (account.discriminator) {
+                html += `<div class="discriminator">Discriminator: [${account.discriminator.join(', ')}]</div>`;
+            }
+
             const fields = account.data?.fields || account.type?.fields;
             if (fields) {
                 html += '<div class="fields">';
@@ -95,6 +178,7 @@ class IDLViewer {
             }
 
             item.innerHTML = html;
+            this.addCopyButton(item, account, 'account');
             container.appendChild(item);
         });
     }
@@ -108,6 +192,10 @@ class IDLViewer {
             let html = `<h3>${instruction.name}</h3>`;
             if (instruction.docs?.length) {
                 html += `<div class="docs">${instruction.docs.join('<br>')}</div>`;
+            }
+
+            if (instruction.discriminator) {
+                html += `<div class="discriminator">Discriminator: [${instruction.discriminator.join(', ')}]</div>`;
             }
 
             if (instruction.accounts?.length) {
@@ -146,6 +234,43 @@ class IDLViewer {
             }
 
             item.innerHTML = html;
+            this.addCopyButton(item, instruction, 'instruction');
+            container.appendChild(item);
+        });
+    }
+
+    private displayEvents(events: Event[]): void {
+        const container = document.getElementById('eventsContent')!;
+        events.forEach(event => {
+            const item = document.createElement('div');
+            item.className = 'item';
+
+            let html = `<h3>${event.name}</h3>`;
+            if (event.docs?.length) {
+                html += `<div class="docs">${event.docs.join('<br>')}</div>`;
+            }
+
+            if (event.discriminator) {
+                html += `<div class="discriminator">Discriminator: [${event.discriminator.join(', ')}]</div>`;
+            }
+
+            const fields = event.type?.fields || event.fields;
+            if (fields) {
+                html += '<div class="fields">';
+                fields.forEach(field => {
+                    html += `
+            <div class="field">
+              <span class="field-name">${field.name}</span>: 
+              <span class="field-type">${this.formatType(field.type)}</span>
+              ${field.docs?.length ? `<div class="docs">${field.docs.join('<br>')}</div>` : ''}
+            </div>
+          `;
+                });
+                html += '</div>';
+            }
+
+            item.innerHTML = html;
+            this.addCopyButton(item, event, 'event');
             container.appendChild(item);
         });
     }
@@ -201,37 +326,6 @@ class IDLViewer {
             }
             if (error.docs?.length) {
                 html += `<div class="docs">${error.docs.join('<br>')}</div>`;
-            }
-
-            item.innerHTML = html;
-            container.appendChild(item);
-        });
-    }
-
-    private displayEvents(events: Event[]): void {
-        const container = document.getElementById('eventsContent')!;
-        events.forEach(event => {
-            const item = document.createElement('div');
-            item.className = 'item';
-
-            let html = `<h3>${event.name}</h3>`;
-            if (event.docs?.length) {
-                html += `<div class="docs">${event.docs.join('<br>')}</div>`;
-            }
-
-            const fields = event.type?.fields || event.fields;
-            if (fields) {
-                html += '<div class="fields">';
-                fields.forEach(field => {
-                    html += `
-            <div class="field">
-              <span class="field-name">${field.name}</span>: 
-              <span class="field-type">${this.formatType(field.type)}</span>
-              ${field.docs?.length ? `<div class="docs">${field.docs.join('<br>')}</div>` : ''}
-            </div>
-          `;
-                });
-                html += '</div>';
             }
 
             item.innerHTML = html;
