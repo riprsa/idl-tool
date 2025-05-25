@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Solana IDL Viewer</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div class="container">
+      <h1>Solana IDL Viewer</h1>
+
+      <div class="file-input-container">
+        <input type="file" id="idlFile" accept=".json" />
+        <label for="idlFile">Choose IDL file</label>
+      </div>
+
+      <div id="idlContent">
+        <div class="section" id="accountsSection">
+          <h2>Accounts</h2>
+          <div class="section-content" id="accountsContent"></div>
+        </div>
+
+        <div class="section" id="instructionsSection">
+          <h2>Instructions</h2>
+          <div class="section-content" id="instructionsContent"></div>
+        </div>
+
+        <div class="section" id="typesSection">
+          <h2>Types</h2>
+          <div class="section-content" id="typesContent"></div>
+        </div>
+
+        <div class="section" id="errorsSection">
+          <h2>Errors</h2>
+          <div class="section-content" id="errorsContent"></div>
+        </div>
+
+        <div class="section" id="eventsSection">
+          <h2>Events</h2>
+          <div class="section-content" id="eventsContent"></div>
+        </div>
+      </div>
+    </div>
+    <script type="module" src="./app.ts"></script>
+  </body>
+</html>

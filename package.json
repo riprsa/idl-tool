@@ -1,0 +1,21 @@
+{
+  "name": "solana-idl-viewer",
+  "version": "1.0.0",
+  "description": "A viewer for Solana IDL files",
+  "type": "module",
+  "scripts": {
+    "dev": "bunx --bun vite",
+    "build": "bunx --bun vite build",
+    "preview": "bunx --bun vite preview"
+  },
+  "dependencies": {
+    "tailwindcss": "^3.4.1",
+    "postcss": "^8.4.35",
+    "autoprefixer": "^10.4.17"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.19",
+    "typescript": "^5.3.3",
+    "vite": "^5.1.3"
+  }
+}
