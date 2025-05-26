@@ -1,11 +1,13 @@
 import { defineConfig } from 'vite';
 
 export default defineConfig({
+    base: '/idl-tool/',
     root: 'src',
     publicDir: 'public',
     build: {
-        outDir: '../dist',
+        outDir: 'dist',
         emptyOutDir: true,
+        sourcemap: true,
     },
     server: {
         port: 3000,
