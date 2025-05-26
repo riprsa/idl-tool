@@ -31,7 +31,7 @@
   }
 
   .file-input-container {
-    @apply mb-8;
+    @apply mb-4;
   }
 
   .file-input-container input[type="file"] {
@@ -40,6 +40,18 @@
 
   .file-input-container label {
     @apply inline-block px-4 py-2 bg-primary-600 text-white rounded-lg cursor-pointer hover:bg-primary-700 transition-colors;
+  }
+
+  .url-input-container {
+    @apply mb-8 flex gap-2;
+  }
+
+  .url-input-container input[type="url"] {
+    @apply flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent;
+  }
+
+  .url-input-container button {
+    @apply px-4 py-2 bg-primary-600 text-white rounded-lg cursor-pointer hover:bg-primary-700 transition-colors;
   }
 
   .section {

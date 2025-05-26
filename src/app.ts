@@ -5,12 +5,15 @@ import './styles.css';
 class IDLViewer {
     private idlContent: HTMLElement;
     private fileInput: HTMLInputElement;
+    private urlInput: HTMLInputElement;
     private currentProgram: Program | null = null;
 
     constructor() {
         this.idlContent = document.getElementById('idlContent')!;
         this.fileInput = document.getElementById('idlFile') as HTMLInputElement;
+        this.urlInput = document.getElementById('idlUrl') as HTMLInputElement;
         this.initializeEventListeners();
+        this.checkUrlForIdl();
     }
 
     private initializeEventListeners(): void {
@@ -37,26 +40,65 @@ class IDLViewer {
             };
             reader.readAsText(file);
         });
+
+        // Add URL input handler
+        const urlForm = document.getElementById('urlForm');
+        urlForm?.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const url = this.urlInput.value.trim();
+            if (!url) return;
+
+            try {
+                const response = await fetch(url);
+                if (!response.ok) {
+                    throw new Error(`Failed to fetch IDL: ${response.statusText}`);
+                }
+
+                const idl = await response.json() as IDL;
+                this.displayIDL(idl);
+            } catch (error) {
+                this.showError(`Error loading IDL from URL: ${error instanceof Error ? error.message : String(error)}`);
+            }
+        });
     }
 
-    private isStandardProgram(program: Program): boolean {
-        // TODO: expand the list
-        const standardPrograms = [
-            '11111111111111111111111111111111', // System Program
-            'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA', // Token Program
-            'ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL', // Associated Token Program
-            'metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s', // Metadata Program
-        ];
-        return standardPrograms.includes(program.publicKey || '');
+    private async checkUrlForIdl(): Promise<void> {
+        const url = new URL(window.location.href);
+        const idlUrl = url.searchParams.get('idl');
+
+        if (idlUrl) {
+            try {
+                const response = await fetch(idlUrl);
+                if (!response.ok) {
+                    throw new Error(`Failed to fetch IDL: ${response.statusText}`);
+                }
+
+                const idl = await response.json() as IDL;
+                this.displayIDL(idl);
+            } catch (error) {
+                this.showError(`Error loading IDL from URL: ${error instanceof Error ? error.message : String(error)}`);
+            }
+        }
     }
+
+    // private isStandardProgram(program: Program): boolean {
+    //     // TODO: expand the list
+    //     const standardPrograms = [
+    //         '11111111111111111111111111111111', // System Program
+    //         'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA', // Token Program
+    //         'ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL', // Associated Token Program
+    //         'metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s', // Metadata Program
+    //     ];
+    //     return standardPrograms.includes(program.publicKey || '');
+    // }
 
     private generateTypeScriptCode(entity: Account | Instruction | Event, type: 'account' | 'instruction' | 'event'): string {
         if (!this.currentProgram) return '';
 
-        if (this.isStandardProgram(this.currentProgram)) {
-            alert('Code generation is not applicable for standard Solana programs');
-            return '';
-        }
+        // if (this.isStandardProgram(this.currentProgram)) {
+        //     alert('Code generation is not applicable for standard Solana programs');
+        //     return '';
+        // }
 
         switch (type) {
             case 'account':

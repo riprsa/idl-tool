@@ -3,48 +3,55 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Solana IDL Viewer</title>
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap"
-      rel="stylesheet"
-    />
+    <title>IDL Viewer</title>
+    <link rel="stylesheet" href="styles.css" />
+    <script
+      defer
+      src="https://umami.riprsa.dev/script.js"
+      data-website-id="2d4cad47-914b-42b4-a48a-dad721adc299"
+    ></script>
   </head>
   <body>
     <div class="container">
-      <h1>Solana IDL Viewer</h1>
+      <h1>IDL Viewer</h1>
 
       <div class="file-input-container">
+        <label for="idlFile">Choose IDL File</label>
         <input type="file" id="idlFile" accept=".json" />
-        <label for="idlFile">Choose IDL file</label>
       </div>
 
+      <form id="urlForm" class="url-input-container">
+        <input type="url" id="idlUrl" placeholder="Enter IDL URL" required />
+        <button type="submit">Load IDL</button>
+      </form>
+
       <div id="idlContent">
-        <div class="section" id="accountsSection">
+        <div class="section">
           <h2>Accounts</h2>
-          <div class="section-content" id="accountsContent"></div>
+          <div id="accountsContent" class="section-content"></div>
         </div>
 
-        <div class="section" id="instructionsSection">
+        <div class="section">
           <h2>Instructions</h2>
-          <div class="section-content" id="instructionsContent"></div>
+          <div id="instructionsContent" class="section-content"></div>
         </div>
 
-        <div class="section" id="typesSection">
+        <div class="section">
           <h2>Types</h2>
-          <div class="section-content" id="typesContent"></div>
+          <div id="typesContent" class="section-content"></div>
         </div>
 
-        <div class="section" id="errorsSection">
+        <div class="section">
           <h2>Errors</h2>
-          <div class="section-content" id="errorsContent"></div>
+          <div id="errorsContent" class="section-content"></div>
         </div>
 
-        <div class="section" id="eventsSection">
+        <div class="section">
           <h2>Events</h2>
-          <div class="section-content" id="eventsContent"></div>
+          <div id="eventsContent" class="section-content"></div>
         </div>
       </div>
     </div>
-    <script type="module" src="./app.ts"></script>
+    <script type="module" src="app.ts"></script>
   </body>
 </html>
