@@ -21,7 +21,7 @@ A simple web-based viewer for Solana IDL (Interface Definition Language) files. 
 1. Clone the repository:
 ```bash
 git clone <repository-url>
-cd solana-idl-viewer
+cd idl-tool
 ```
 
 2. Install dependencies:
